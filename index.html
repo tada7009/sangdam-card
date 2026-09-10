@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>신차 장기렌트 · 상담 콜 카드</title>
+<style>
+  :root{
+    --navy:#1F3864; --blue:#2E5496; --sky:#D9E1F2; --bg:#F4F6FB;
+    --ink:#1c2433; --sub:#6b7280; --line:#e4e8f0;
+    --amber:#FFF4D6; --amberln:#E9C46A; --amberink:#7a5b00;
+    --red:#FDECEC; --redln:#e57373; --redink:#a11a1a;
+    --green:#E7F6EC; --greenln:#69b487; --greenink:#1c6b3f;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"맑은 고딕","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
+    font-size:15px;line-height:1.5}
+  .topbar{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;
+    padding:10px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;
+    box-shadow:0 2px 10px rgba(0,0,0,.12)}
+  .topbar h1{font-size:16px;margin:0;font-weight:800;letter-spacing:-.3px;white-space:nowrap}
+  .topbar .badge{background:rgba(255,255,255,.15);border-radius:6px;padding:2px 8px;font-size:12px}
+  .tb-field{display:flex;align-items:center;gap:6px}
+  .tb-field label{font-size:12px;opacity:.85;white-space:nowrap}
+  .tb-field input{border:none;border-radius:6px;padding:5px 8px;font-size:14px;
+    width:120px;font-family:inherit;background:#fff;color:var(--ink)}
+  .tb-field input.wide{width:150px}
+  .tb-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .btn{border:none;border-radius:8px;padding:8px 13px;font-size:13px;font-weight:700;
+    cursor:pointer;font-family:inherit;transition:.15s}
+  .btn:disabled{opacity:.6;cursor:default}
+  .btn-ghost{background:rgba(255,255,255,.16);color:#fff}
+  .btn-ghost:hover{background:rgba(255,255,255,.28)}
+  .btn-amber{background:var(--amberln);color:#3a2c00}
+  .btn-primary{background:#5B8DEF;color:#fff}
+  .btn-save{background:#2ec77d;color:#fff}
+  .btn-save:hover{filter:brightness(1.05)}
+  .btn-open{background:#3f8cff;color:#fff}
+  .btn-open:hover{filter:brightness(1.05)}
+  .toast a{color:#7ecbff;font-weight:800;text-decoration:none;margin-left:12px;
+    border-left:1px solid rgba(255,255,255,.3);padding-left:12px;white-space:nowrap}
+  .toast a:hover{text-decoration:underline}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px;
+    display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:16px 16px 14px;margin-bottom:16px;box-shadow:0 1px 3px rgba(20,30,60,.04)}
+  .sec-head{display:flex;align-items:center;gap:9px;margin:-2px 0 12px}
+  .sec-num{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;
+    display:grid;place-items:center;font-size:13px;font-weight:800;flex:none}
+  .sec-head h2{font-size:15px;margin:0;font-weight:800;letter-spacing:-.2px}
+  .sec-head .hint{font-size:12px;color:var(--sub);margin-left:auto;font-weight:600}
+  .sec-easy .sec-num{background:var(--greenln)}
+  .sec-warm .sec-num{background:#5B8DEF}
+  .sec-sensitive .sec-num{background:#E76F51}
+  .field{margin-bottom:11px}
+  .field:last-child{margin-bottom:0}
+  .field > label{display:block;font-size:13px;font-weight:700;color:#33415a;margin-bottom:5px}
+  .field .tag{font-size:10.5px;font-weight:800;border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+  .tag-sens{background:var(--red);color:var(--redink);border:1px solid var(--redln)}
+  input[type=text],input[type=number],input[type=date],select,textarea{
+    width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;
+    font-size:14px;font-family:inherit;background:#fcfdff;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#5B8DEF;background:#fff;
+    box-shadow:0 0 0 3px rgba(91,141,239,.12)}
+  textarea{resize:vertical;min-height:44px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:520px){.row2{grid-template-columns:1fr}}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{border:1.5px solid var(--line);background:#fff;border-radius:20px;
+    padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;color:#44506a;transition:.12s}
+  .chip:hover{border-color:#9db6ef}
+  .chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .script{margin-top:6px;background:var(--amber);border:1px solid var(--amberln);
+    border-radius:9px;padding:8px 11px;font-size:13px;color:var(--amberink);line-height:1.5}
+  .script b{color:#5a4200}
+  .script.hide{display:none}
+  .script .lead{font-weight:800;margin-right:4px}
+  .why{display:block;margin-top:4px;font-size:11.5px;color:#96702a;font-weight:600}
+  .side{position:sticky;top:64px}
+  @media(max-width:900px){.side{position:static}}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(20,30,60,.04)}
+  .panel h3{font-size:13px;margin:0 0 10px;font-weight:800;color:var(--navy);
+    display:flex;align-items:center;gap:6px}
+  .panel h3 .mini{margin-left:auto;font-size:11px;font-weight:700;color:#5B8DEF;cursor:pointer;
+    background:none;border:none;font-family:inherit}
+  .cfg-body label{display:block;font-size:11.5px;font-weight:700;color:#5a6478;margin:8px 0 3px}
+  .cfg-body input{padding:7px 9px;font-size:12.5px}
+  .cfg-body.hide{display:none}
+  .cfg-status{font-size:11.5px;font-weight:700;padding:5px 8px;border-radius:6px;margin-top:8px;text-align:center}
+  .cfg-ok{background:var(--green);color:var(--greenink)}
+  .cfg-no{background:#f4f6fb;color:var(--sub)}
+  .doc{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;
+    font-size:13px;margin-bottom:5px;background:#f7f9fc;border:1px solid #eef1f7}
+  .doc input{width:17px;height:17px;flex:none;accent-color:#2E7D32}
+  .doc.done{background:var(--green);border-color:var(--greenln)}
+  .doc.done label{color:var(--greenink);text-decoration:line-through}
+  .doc label{cursor:pointer;flex:1}
+  .doc-empty{font-size:12.5px;color:var(--sub);padding:6px 2px}
+  .docsum{margin-top:8px;font-size:12.5px;font-weight:800;text-align:center;
+    padding:7px;border-radius:8px;background:#f0f3f9;color:#44506a}
+  .docsum.ok{background:var(--green);color:var(--greenink)}
+  .docsum.miss{background:var(--red);color:var(--redink)}
+  .alert{border-radius:9px;padding:9px 11px;font-size:12.8px;margin-bottom:7px;
+    line-height:1.45;font-weight:600;display:flex;gap:7px;align-items:flex-start}
+  .alert:last-child{margin-bottom:0}
+  .alert .ic{flex:none;font-size:14px}
+  .a-red{background:var(--red);color:var(--redink);border:1px solid var(--redln)}
+  .a-amber{background:var(--amber);color:var(--amberink);border:1px solid var(--amberln)}
+  .a-dim{background:#f4f6fb;color:var(--sub);border:1px solid var(--line);font-weight:500}
+  .rule{font-size:12px;color:#55607a;padding:5px 0;border-bottom:1px dashed #e6e9f1}
+  .rule:last-child{border-bottom:none}
+  .rule.hot{color:var(--redink);font-weight:800}
+  .rule b{color:var(--navy)}
+  .foot{max-width:1180px;margin:0 auto;padding:0 16px 40px;color:var(--sub);font-size:12px}
+  .copybar{display:flex;gap:8px;margin-top:6px}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--navy);color:#fff;padding:11px 20px;border-radius:10px;font-size:14px;
+    font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90%;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media print{.topbar,.side,.tb-actions,.copybar,.script-toggle{display:none}
+    .wrap{grid-template-columns:1fr}body{background:#fff}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📞 상담 콜 카드</h1>
+  <span class="badge">신차 장기렌트</span>
+  <div class="tb-field"><label>상담일</label><input type="text" id="f_date"></div>
+  <div class="tb-field"><label>마지막통화</label><input type="text" id="f_last"></div>
+  <div class="tb-field"><label>성함</label><input type="text" id="f_name" class="wide" placeholder="고객 성함"></div>
+  <div class="tb-field"><label>연락처</label><input type="text" id="f_tel" class="wide" placeholder="010-"></div>
+  <div class="tb-actions">
+    <button class="btn btn-save" id="btn_save_top" onclick="saveToSheet()">📤 시트에 저장</button>
+    <button class="btn btn-open" id="btn_open_sheet" onclick="openSheet()">📊 시트 열기</button>
+    <button class="btn btn-ghost script-toggle" id="btn_scripts" onclick="toggleScripts()">💬 멘트 숨기기</button>
+    <button class="btn btn-ghost" onclick="resetAll()">↻ 새 통화</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="main">
+    <div class="card sec-easy">
+      <div class="sec-head"><span class="sec-num">1</span><h2>오프닝 · 기본</h2><span class="hint">부담 없는 것부터</span></div>
+      <div class="row2">
+        <div class="field"><label>지역</label>
+          <input type="text" id="f_area" placeholder="예) 서울 은평구">
+          <div class="script"><span class="lead">💬</span>"혹시 어느 지역에 계세요? 출고나 서류 받으시는 방법 미리 안내드리려고요."</div>
+        </div>
+        <div class="field"><label>용도</label>
+          <div class="chips" data-single id="c_use">
+            <span class="chip">출퇴근</span><span class="chip">업무용</span>
+            <span class="chip">영업용</span><span class="chip">가정용</span><span class="chip">법인업무</span></div>
+          <div class="script"><span class="lead">💬</span>"주로 어떤 용도로 쓰실 거예요? 출퇴근인지 업무용인지에 따라 주행거리를 잡아드릴게요."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card sec-warm">
+      <div class="sec-head"><span class="sec-num">2</span><h2>니즈 파악</h2><span class="hint">고객이 신나서 말하는 구간</span></div>
+      <div class="field"><label>필요 차량</label>
+        <div class="chips" data-single id="c_rl"><span class="chip">렌트</span><span class="chip">리스</span><span class="chip">아직 미정</span></div>
+        <div class="script"><span class="lead">💬</span>"렌트로 보고 계세요, 리스로 보고 계세요? 아직이면 두 개 장단점 비교해서 알려드릴게요."</div>
+      </div>
+      <div class="field"><label>차종 · 옵션 · 색상</label>
+        <input type="text" id="f_model" placeholder="예) 더 뉴 그랜저 / 어비스블랙 / 풀옵션">
+        <div class="script"><span class="lead">💬</span>"생각해두신 차종 있으세요? 색상이나 옵션도 원하시는 거 있으면 맞춰서 견적 뽑아드릴게요."</div>
+      </div>
+      <div class="field"><label>현재 · 이전 차량</label>
+        <input type="text" id="f_curcar" placeholder="예) 현재 아반떼 / 이전 K5">
+        <div class="script"><span class="lead">💬</span>"지금 타시는 차는 어떤 거세요?"<span class="why">→ 라포 형성 + 취향·예산대를 자연스럽게 파악</span></div>
+      </div>
+      <div class="field"><label>운전자 범위</label>
+        <div class="chips" data-single id="c_drv">
+          <span class="chip">본인만</span><span class="chip">본인+배우자</span>
+          <span class="chip">가족한정</span><span class="chip">임직원한정</span><span class="chip">1인추가</span></div>
+        <div class="script"><span class="lead">💬</span>"운전은 고객님만 하세요? 아니면 배우자분이나 다른 분도 하실까요? 보험 범위가 달라져서 확인차 여쭤요."</div>
+      </div>
+    </div>
+
+    <div class="card sec-warm">
+      <div class="sec-head"><span class="sec-num">3</span><h2>조건 구체화</h2></div>
+      <div class="row2">
+        <div class="field"><label>기간</label>
+          <div class="chips" data-single id="c_term">
+            <span class="chip">24개월</span><span class="chip">36개월</span>
+            <span class="chip">48개월</span><span class="chip">60개월</span></div>
+          <div class="script"><span class="lead">💬</span>"보통 3~4년 많이 하시는데, 기간 생각해두신 거 있으세요?"</div>
+        </div>
+        <div class="field"><label>연간 주행거리</label>
+          <input type="text" id="f_km" placeholder="예) 2만 km">
+          <div class="script"><span class="lead">💬</span>"1년에 대략 얼마나 타실 것 같으세요? 출퇴근 거리로 잡아드려도 돼요."<span class="why">→ 약정거리 초과 위약금 예방 명분</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card sec-sensitive">
+      <div class="sec-head"><span class="sec-num">4</span><h2>민감 구간</h2><span class="hint" style="color:#c0392b">멘트로 부드럽게</span></div>
+      <div class="field"><label>직업 · 소득형태<span class="tag tag-sens">민감</span></label>
+        <div class="chips" data-single id="c_type">
+          <span class="chip">개인(4대보험)</span><span class="chip">개인(프리랜서3.3%)</span>
+          <span class="chip">개인사업자</span><span class="chip">법인</span></div>
+        <input type="text" id="f_job" placeholder="구체 직업/업종 (예: 프리랜서 디자이너)" style="margin-top:8px">
+        <div class="script"><span class="lead">💬</span>"혹시 <b>4대보험 되는 직장</b>에 다니세요, 아니면 <b>프리랜서(3.3%)</b>나 <b>사업자</b>세요? 그거에 따라 준비 서류랑 승인 조건이 달라서 미리 안내드리려고요."<span class="why">→ 소득을 직접 묻지 않고 '서류 안내' 명분으로</span></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>만 나이<span class="tag tag-sens">민감</span></label>
+          <input type="number" id="f_age" placeholder="예: 25" min="18" max="99" oninput="renderAge()">
+          <div class="script"><span class="lead">💬</span>"실례지만 조건 확인차 <b>만 나이가 어떻게 되세요?</b> 나이에 따라 더 저렴한 카드사 조건이 있어서요."<span class="why">→ 나이 질문을 '혜택' 명분으로 전환</span></div>
+        </div>
+        <div class="field"><label>생년월일 <span style="font-weight:500;color:#9aa3b2">(선택 · 있으면 시트 연령체크 자동)</span></label>
+          <input type="date" id="f_birth" onchange="birthToAge()">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>초기비용 (선납/보증)<span class="tag tag-sens">민감</span></label>
+          <input type="text" id="f_adv" placeholder="예) 선납 300 / 보증금 0">
+          <div class="script"><span class="lead">💬</span>"선납금이나 보증금은 얼마 정도 생각하세요? <b>초기금을 조금 넣으시면 월납이 확 낮아지는 구조</b>라, 편하신 쪽으로 맞춰드릴게요."<span class="why">→ 예산 질문을 '맞춤 설계' 명분으로</span></div>
+        </div>
+        <div class="field"><label>예상 월납입료<span class="tag tag-sens">민감</span></label>
+          <input type="text" id="f_mon" placeholder="예) 70만 원 선">
+          <div class="script"><span class="lead">💬</span>"월 납입은 어느 정도 선이 편하세요? 그 예산에 맞춰서 <b>차급이나 기간으로 딱 맞게</b> 잡아드릴게요."<span class="why">→ 예산을 '맞춤' 명분으로</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-head"><span class="sec-num">5</span><h2>계약사 · 진행상태</h2></div>
+      <div class="row2">
+        <div class="field"><label>계약사 / 캐피탈</label>
+          <select id="f_cap" onchange="renderAlerts()">
+            <option value="">선택</option>
+            <option>롯데렌탈</option><option>롯데캐피탈</option><option>SK렌터카</option>
+            <option>현대캐피탈</option><option>KB캐피탈</option><option>메리츠캐피탈</option>
+            <option>하나캐피탈</option><option>오릭스</option><option>신한카드</option><option>기타</option></select>
+        </div>
+        <div class="field"><label>진행상태</label>
+          <select id="f_stat">
+            <option value="">선택</option>
+            <option>상담중</option><option>견적발송</option><option>계약진행</option>
+            <option>심사중</option><option>출고대기</option><option>운행중</option>
+            <option>만기예정</option><option>보류</option></select>
+        </div>
+      </div>
+      <div class="field"><label>메모 · 특이사항</label><textarea id="f_note" placeholder="통화 중 메모"></textarea></div>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="panel">
+      <h3>⚙️ 시트 연동 설정 <button class="mini" onclick="toggleCfg()" id="cfg_toggle">펼치기</button></h3>
+      <div class="cfg-body hide" id="cfg_body">
+        <label>① 웹앱 URL (Apps Script 배포 주소)</label>
+        <input type="text" id="cfg_url" placeholder="https://script.google.com/macros/s/.../exec">
+        <label>② 시크릿 (스크립트와 동일하게)</label>
+        <input type="text" id="cfg_secret" placeholder="예: rider1234">
+        <label>③ 시트 바로가기 URL (선택)</label>
+        <input type="text" id="cfg_sheet" placeholder="구글 시트 주소">
+        <div class="copybar">
+          <button class="btn btn-primary" style="flex:1" onclick="saveCfg()">설정 저장</button>
+          <a id="cfg_open" class="btn btn-amber" style="flex:1;text-align:center;text-decoration:none;line-height:1.7" target="_blank">시트 열기</a>
+        </div>
+        <button class="btn btn-open" style="width:100%;margin-top:8px" onclick="testConn()">🔗 연결 테스트 (웹앱 열기)</button>
+      </div>
+      <div class="cfg-status cfg-no" id="cfg_status">미설정 — 설치 가이드 참고</div>
+    </div>
+
+    <div class="panel">
+      <h3>📋 요약 → 일괄 저장 <button class="mini" onclick="toggleBulk()" id="bulk_toggle">펼치기</button></h3>
+      <div class="cfg-body hide" id="bulk_body">
+        <div style="font-size:11.5px;color:#6b7280;margin-bottom:6px;line-height:1.5">
+          이미 복사해둔 <b>요약 텍스트</b>를 붙여넣고 저장하면 시트에 한 번에 입력됩니다.<br>
+          여러 명이면 각 요약 사이에 <b>---</b> (대시 3개) 한 줄로 구분하세요.
+        </div>
+        <textarea id="bulk_text" style="min-height:130px" placeholder="상담일: 2026-09-09&#10;성함: 홍길동&#10;연락처: 010-1234-5678&#10;고객유형: 개인사업자&#10;계약사: 롯데캐피탈&#10;...&#10;---&#10;성함: 김철수&#10;..."></textarea>
+        <div class="copybar">
+          <button class="btn btn-primary" style="flex:1" onclick="previewBulk()">미리보기</button>
+          <button class="btn btn-save" style="flex:1" onclick="bulkSave()">시트에 일괄 저장</button>
+        </div>
+        <div id="bulk_log" style="font-size:11.5px;margin-top:8px;color:#44506a;line-height:1.5"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>📄 필요 서류 <span id="doc_type" style="color:#6b7280;font-weight:600"></span></h3>
+      <div id="doc_list"><div class="doc-empty">직업·소득형태를 선택하면 필요 서류가 표시됩니다.</div></div>
+      <div class="docsum" id="doc_sum" style="display:none"></div>
+    </div>
+
+    <div class="panel">
+      <h3>⚠️ 자동 경고 · 조건</h3>
+      <div id="alerts"><div class="alert a-dim"><span class="ic">💤</span><span>나이·유형을 입력하면 조건이 여기 뜹니다.</span></div></div>
+    </div>
+
+    <div class="panel">
+      <h3>📌 계약사 제약 (상시 참고)</h3>
+      <div class="rule" id="r_lottecap"><b>롯데캐피탈</b> · 개인사업자 만21세 미만 불가 <span style="color:#1c6b3f">(법인 가능)</span></div>
+      <div class="rule" id="r_orix"><b>오릭스</b> · 개인사업자 만21세 미만 불가 <span style="color:#1c6b3f">(선구매 가능)</span></div>
+      <div class="rule" id="r_lotterent"><b>롯데렌탈</b> · 대리점 차량 <b style="color:#a11a1a">X</b></div>
+      <div class="rule"><b>만26세 미만</b> · 신한카드사 조건 저렴</div>
+      <div class="rule"><b>만24세 미만</b> · 부모님 계약자로 진행 필요</div>
+    </div>
+
+    <div class="panel">
+      <h3>✅ 상담 요약 (수동 복사용)</h3>
+      <textarea id="summary" style="min-height:120px" readonly placeholder="'요약 생성'을 누르세요"></textarea>
+      <div class="copybar">
+        <button class="btn btn-primary" style="flex:1" onclick="makeSummary()">요약 생성</button>
+        <button class="btn btn-amber" style="flex:1" onclick="copySummary()">복사</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  통화하며 필요한 순간 아무 항목이나 짚어 쓰세요. · <b>시트 연동 설정</b>을 한 번 해두면 이후엔
+  <b>📤 시트에 저장</b> 한 번으로 고객마스터·서류체크리스트에 자동 입력됩니다. · 새 통화는 '↻ 새 통화'.
+</div>
+
+<div class="toast" id="toast">복사되었습니다</div>
+
+<script>
+const DOCMAP = {
+  "개인(4대보험)":     [[4,"면허증"],[5,"건강보험 자격득실확인서"],[6,"건강보험 납부확인서"]],
+  "개인(프리랜서3.3%)":[[4,"면허증"],[5,"건강보험 자격득실확인서"],[6,"건강보험 납부확인서"],[7,"소득금액증명원"],[8,"원천징수영수증"],[9,"재직증명서"]],
+  "개인사업자":        [[4,"면허증"],[10,"사업자등록증"],[11,"부가세 과세표준증명원"]],
+  "법인":             [[10,"사업자등록증"],[11,"부가세 과세표준증명원"],[12,"대표자 신분증(+연락처)"],[13,"재무제표"],[14,"주주명부(법인인감 날인)"],[15,"법인등기부등본(말소포함)"]]
+};
+let selected = {c_use:"",c_rl:"",c_drv:"",c_term:"",c_type:""};
+let scriptsOn = true;
+const CFG_KEY = "callcard_cfg_v1";
+
+(function initDate(){
+  const t=new Date(), p=n=>String(n).padStart(2,'0');
+  document.getElementById('f_date').value = `${t.getFullYear()}-${p(t.getMonth()+1)}-${p(t.getDate())}`;
+})();
+loadCfg();
+
+document.querySelectorAll('.chips[data-single]').forEach(group=>{
+  group.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      const on = chip.classList.contains('on');
+      group.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+      if(!on) chip.classList.add('on');
+      selected[group.id] = on ? "" : chip.textContent.trim();
+      if(group.id==='c_type'){ renderDocs(); renderAlerts(); }
+    });
+  });
+});
+
+function renderDocs(){
+  const type=selected.c_type, list=document.getElementById('doc_list');
+  const sum=document.getElementById('doc_sum'), typeLbl=document.getElementById('doc_type');
+  if(!type){ list.innerHTML='<div class="doc-empty">직업·소득형태를 선택하면 필요 서류가 표시됩니다.</div>';
+    sum.style.display='none'; typeLbl.textContent=''; return; }
+  typeLbl.textContent='· '+type;
+  list.innerHTML = DOCMAP[type].map((pair,i)=>{const[col,name]=pair;return `
+    <div class="doc" data-col="${col}" id="doc${i}">
+      <input type="checkbox" onchange="toggleDoc(${i})">
+      <label onclick="this.previousElementSibling.click()">${name}</label></div>`;}).join('');
+  updateDocSum();
+}
+function toggleDoc(i){
+  const box=document.getElementById('doc'+i);
+  box.classList.toggle('done',box.querySelector('input').checked);
+  updateDocSum();
+}
+function updateDocSum(){
+  const type=selected.c_type; if(!type) return;
+  const total=DOCMAP[type].length;
+  const done=document.querySelectorAll('#doc_list .doc.done').length;
+  const sum=document.getElementById('doc_sum'); sum.style.display='block';
+  if(total-done===0){ sum.className='docsum ok'; sum.textContent=`✅ 서류 완비 (${total}/${total})`; }
+  else{ sum.className='docsum miss'; sum.textContent=`⚠️ 미제출 ${total-done}건 · 제출 ${done}/${total}`; }
+}
+function checkedDocCols(){
+  return [...document.querySelectorAll('#doc_list .doc')]
+    .filter(d=>d.querySelector('input').checked).map(d=>+d.dataset.col);
+}
+
+function birthToAge(){
+  const b=document.getElementById('f_birth').value; if(!b) return;
+  const bd=new Date(b), t=new Date();
+  let a=t.getFullYear()-bd.getFullYear();
+  const m=t.getMonth()-bd.getMonth();
+  if(m<0||(m===0&&t.getDate()<bd.getDate())) a--;
+  document.getElementById('f_age').value=a; renderAlerts();
+}
+function renderAge(){ renderAlerts(); }
+function renderAlerts(){
+  const age=parseInt(document.getElementById('f_age').value);
+  const type=selected.c_type, cap=document.getElementById('f_cap').value;
+  const box=document.getElementById('alerts'); let out=[];
+  if(!isNaN(age)){
+    if(age<24) out.push(`<div class="alert a-red"><span class="ic">🔴</span><span><b>만 ${age}세 · 24세 미만</b> — 부모님이 계약자로 진행해야 합니다.</span></div>`);
+    else if(age<26) out.push(`<div class="alert a-amber"><span class="ic">💳</span><span><b>만 ${age}세 · 26세 미만</b> — 신한카드사 조건이 더 저렴합니다.</span></div>`);
+    if(type==="개인사업자" && age<21)
+      out.push(`<div class="alert a-red"><span class="ic">🔴</span><span><b>개인사업자 만 ${age}세</b> — 롯데캐피탈·오릭스 <u>만21세 미만 불가</u>. (롯데=법인전환 / 오릭스=선구매)</span></div>`);
+  }
+  if(cap==="롯데렌탈") out.push(`<div class="alert a-amber"><span class="ic">📌</span><span><b>롯데렌탈</b> — 대리점 차량은 진행 불가.</span></div>`);
+  if(cap==="롯데캐피탈"&&type==="개인사업자") out.push(`<div class="alert a-amber"><span class="ic">📌</span><span><b>롯데캐피탈+개인사업자</b> — 만21세 미만 불가(법인 가능).</span></div>`);
+  if(cap==="오릭스"&&type==="개인사업자") out.push(`<div class="alert a-amber"><span class="ic">📌</span><span><b>오릭스+개인사업자</b> — 만21세 미만 불가(선구매 가능).</span></div>`);
+  document.getElementById('r_lottecap').classList.toggle('hot',cap==="롯데캐피탈");
+  document.getElementById('r_orix').classList.toggle('hot',cap==="오릭스");
+  document.getElementById('r_lotterent').classList.toggle('hot',cap==="롯데렌탈");
+  box.innerHTML = out.length? out.join('') : '<div class="alert a-dim"><span class="ic">✔️</span><span>현재 특이 제약 없음.</span></div>';
+}
+
+function toggleScripts(){
+  scriptsOn=!scriptsOn;
+  document.querySelectorAll('.script').forEach(s=>s.classList.toggle('hide',!scriptsOn));
+  document.getElementById('btn_scripts').textContent = scriptsOn?'💬 멘트 숨기기':'💬 멘트 보기';
+}
+
+/* ---------- 시트 연동 설정 ---------- */
+function toggleCfg(){
+  const b=document.getElementById('cfg_body');
+  b.classList.toggle('hide');
+  document.getElementById('cfg_toggle').textContent = b.classList.contains('hide')?'펼치기':'접기';
+}
+function loadCfg(){
+  let cfg={};
+  try{ cfg=JSON.parse(localStorage.getItem(CFG_KEY))||{}; }catch(e){}
+  document.getElementById('cfg_url').value=cfg.url||'';
+  document.getElementById('cfg_secret').value=cfg.secret||'';
+  document.getElementById('cfg_sheet').value=cfg.sheet||'';
+  updateCfgStatus(cfg);
+  return cfg;
+}
+function saveCfg(){
+  const cfg={ url:document.getElementById('cfg_url').value.trim(),
+    secret:document.getElementById('cfg_secret').value.trim(),
+    sheet:document.getElementById('cfg_sheet').value.trim() };
+  try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){ alert('브라우저 저장 실패 — 파일을 직접 열어 사용하세요.'); }
+  updateCfgStatus(cfg); showToastMsg('설정을 저장했습니다');
+}
+function updateCfgStatus(cfg){
+  const s=document.getElementById('cfg_status'), open=document.getElementById('cfg_open');
+  if(cfg && cfg.url){ s.className='cfg-status cfg-ok'; s.textContent='✅ 연동 준비됨 — 시트에 저장 가능'; }
+  else{ s.className='cfg-status cfg-no'; s.textContent='미설정 — 설치 가이드 참고'; }
+  if(cfg && cfg.sheet){ open.style.display='block'; open.href=cfg.sheet; } else { open.style.display='none'; }
+}
+
+function val(id){return document.getElementById(id).value.trim();}
+function num(v){ const n=parseInt(String(v).replace(/[^0-9]/g,'')); return isNaN(n)?'':n; }
+
+/* ---------- 시트에 저장 (자동화 핵심) ---------- */
+async function saveToSheet(){
+  const cfg=loadCfg();
+  if(!cfg.url){ alert('먼저 오른쪽 ⚙️ 시트 연동 설정에서 웹앱 URL을 입력하세요.');
+    document.getElementById('cfg_body').classList.remove('hide');
+    document.getElementById('cfg_toggle').textContent='접기'; return; }
+  if(!val('f_name')){ alert('성함을 입력해주세요.'); return; }
+  const payload={
+    token:cfg.secret, name:val('f_name'), tel:val('f_tel'), area:val('f_area'),
+    type:selected.c_type, job:val('f_job'),
+    birth:val('f_birth'), age:val('f_age'),
+    consultDate:val('f_date'), lastCall:val('f_last'),
+    rl:selected.c_rl, model:val('f_model'), curcar:val('f_curcar'), use:selected.c_use,
+    term:num(selected.c_term), km:val('f_km'), driver:selected.c_drv,
+    advance:val('f_adv'), monthly:val('f_mon'), cap:val('f_cap'), status:val('f_stat'),
+    note:val('f_note'), docCols:checkedDocCols()
+  };
+  const btns=[document.getElementById('btn_save_top')];
+  btns.forEach(b=>{b.disabled=true;b.textContent='전송 중…';});
+  try{
+    await fetch(cfg.url,{method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload)});
+    showToastMsg('📤 저장 완료 · 새 행을 확인하세요', cfg.sheet);
+  }catch(err){ showToastMsg('전송 시도함 · 시트를 확인해주세요', cfg.sheet); }
+  btns.forEach(b=>{b.disabled=false;b.textContent='📤 시트에 저장';});
+}
+
+function makeSummary(){
+  const age=val('f_age'); let ageMemo=""; const a=parseInt(age);
+  if(!isNaN(a)){ if(a<24) ageMemo=" (⚠️24세미만·부모님계약)"; else if(a<26) ageMemo=" (💳26세미만·신한카드)"; }
+  const type=selected.c_type; let docLine="";
+  if(type){ const total=DOCMAP[type].length, done=document.querySelectorAll('#doc_list .doc.done').length;
+    docLine = done===total?`서류 ✅완비(${total})`:`서류 ⚠️미제출 ${total-done}건`; }
+  const L=[["상담일",val('f_date')],["마지막통화",val('f_last')],["성함",val('f_name')],["연락처",val('f_tel')],
+    ["지역",val('f_area')],["고객유형",type],["직업",val('f_job')],["만나이",age?"만 "+age+"세"+ageMemo:""],
+    ["렌트/리스",selected.c_rl],["차종·옵션·색상",val('f_model')],["현재·이전차량",val('f_curcar')],
+    ["용도",selected.c_use],["기간",selected.c_term],["연간주행",val('f_km')],["운전자범위",selected.c_drv],
+    ["초기비용",val('f_adv')],["예상월납",val('f_mon')],["계약사",val('f_cap')],["진행상태",val('f_stat')],
+    ["서류",docLine],["메모",val('f_note')]];
+  if(type){
+    const names=[...document.querySelectorAll('#doc_list .doc')]
+      .filter(d=>d.querySelector('input').checked)
+      .map(d=>d.querySelector('label').textContent.trim());
+    if(names.length) L.push(["서류제출", names.join(',')]);
+  }
+  document.getElementById('summary').value = L.filter(([k,v])=>v).map(([k,v])=>`${k}: ${v}`).join('\n') || "(입력된 내용이 없습니다)";
+}
+function copySummary(){
+  const ta=document.getElementById('summary'); if(!ta.value) makeSummary();
+  ta.removeAttribute('readonly'); ta.select();
+  navigator.clipboard.writeText(ta.value).then(()=>showToastMsg('복사되었습니다')).catch(()=>{document.execCommand('copy');showToastMsg('복사되었습니다');});
+  ta.setAttribute('readonly','');
+}
+function showToastMsg(msg, link){
+  const t=document.getElementById('toast');
+  let html = escapeHtml(msg);
+  if(link){ html += `<a href="${escapeHtml(link)}" target="_blank" rel="noopener">시트 열기 →</a>`; }
+  t.innerHTML = html;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), link ? 5000 : 1600);
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+function openSheet(){
+  const cfg=loadCfg();
+  if(cfg.sheet){ window.open(cfg.sheet,'_blank','noopener'); return; }
+  alert('구글 시트 주소가 아직 없습니다.\n오른쪽 ⚙️ 시트 연동 설정 → ③ 시트 바로가기 URL 에 구글 시트 주소를 넣고 저장하면, 여기서 바로 열려요.');
+  document.getElementById('cfg_body').classList.remove('hide');
+  document.getElementById('cfg_toggle').textContent='접기';
+  document.getElementById('cfg_sheet').focus();
+}
+function testConn(){
+  const url=document.getElementById('cfg_url').value.trim();
+  if(!url){ alert('먼저 ① 웹앱 URL을 입력하세요.'); return; }
+  if(url.indexOf('/exec')<0) alert('주의: URL이 /exec 로 끝나야 합니다. 지금 주소를 확인하세요.');
+  window.open(url,'_blank','noopener');
+  showToastMsg('새 탭 확인 → {"ok":true...} 나오면 정상 / 로그인 화면 나오면 접근권한을 "모든 사용자"로 재배포');
+}
+
+/* ---------- 요약 텍스트 → 시트 일괄 저장 ---------- */
+const LABELMAP = {
+  '상담일':'consultDate','마지막통화':'lastCall','성함':'name','연락처':'tel','지역':'area',
+  '고객유형':'type','직업':'job','만나이':'age','렌트/리스':'rl','차종·옵션·색상':'model',
+  '현재·이전차량':'curcar','용도':'use','기간':'term','연간주행':'km','운전자범위':'driver',
+  '초기비용':'advance','예상월납':'monthly','계약사':'cap','진행상태':'status','메모':'note',
+  '서류제출':'__docs'
+};
+const DOCNAME2COL = {
+  '면허증':4,'건강보험 자격득실확인서':5,'건강보험 납부확인서':6,'소득금액증명원':7,
+  '원천징수영수증':8,'재직증명서':9,'사업자등록증':10,'부가세 과세표준증명원':11,
+  '대표자 신분증':12,'대표자 신분증(+연락처)':12,'재무제표':13,
+  '주주명부':14,'주주명부(법인인감)':14,'주주명부(법인인감 날인)':14,
+  '법인등기부등본':15,'법인등기부등본(말소포함)':15
+};
+function toggleBulk(){
+  const b=document.getElementById('bulk_body');
+  b.classList.toggle('hide');
+  document.getElementById('bulk_toggle').textContent = b.classList.contains('hide')?'펼치기':'접기';
+}
+function parseSummaries(text){
+  if(!text || !text.trim()) return [];
+  let blocks;
+  if(/\n\s*[-=]{3,}\s*(?:\n|$)/.test('\n'+text)){
+    blocks = text.split(/\n\s*[-=]{3,}\s*(?:\n|$)/);
+  }else{
+    blocks = splitByName(text);
+  }
+  return blocks.map(parseBlock).filter(r=>r && r.name);
+}
+function splitByName(text){
+  const lines=text.split(/\r?\n/), out=[]; let cur=[], buf=[], hasName=false;
+  const isName=l=>/^\s*성함\s*[:：]/.test(l);
+  const isPre =l=>/^\s*(상담일|마지막통화)\s*[:：]/.test(l);
+  for(const l of lines){
+    if(isName(l)){
+      if(hasName){ out.push(cur.join('\n')); cur=buf.slice(); buf=[]; }
+      else if(buf.length){ cur.push(...buf); buf=[]; }
+      cur.push(l); hasName=true;
+    }else if(isPre(l) && hasName){ buf.push(l); }
+    else{ if(buf.length){ cur.push(...buf); buf=[]; } cur.push(l); }
+  }
+  if(buf.length) cur.push(...buf);
+  if(cur.length) out.push(cur.join('\n'));
+  return out;
+}
+function parseBlock(block){
+  const rec={docCols:[]};
+  block.split(/\r?\n/).forEach(line=>{
+    const m=line.match(/^\s*([^:：]+?)\s*[:：]\s*(.*)$/);
+    if(!m) return;
+    const key=LABELMAP[m[1].trim()]; if(!key) return;
+    const value=m[2].trim();
+    if(key==='__docs'){
+      value.split(/[,，]/).forEach(n=>{ const c=DOCNAME2COL[n.trim()]; if(c && rec.docCols.indexOf(c)<0) rec.docCols.push(c); });
+    }else if(key==='age'||key==='term'){
+      const d=value.match(/\d+/); if(d) rec[key]=d[0];
+    }else rec[key]=value;
+  });
+  return rec;
+}
+function previewBulk(){
+  const recs=parseSummaries(document.getElementById('bulk_text').value);
+  const log=document.getElementById('bulk_log');
+  if(!recs.length){ log.innerHTML='<span style="color:#a11a1a">파싱된 고객이 없습니다. 각 요약이 "성함: 이름" 형식인지 확인하세요.</span>'; return; }
+  log.innerHTML = `<b>${recs.length}명 인식됨:</b> ` +
+    recs.map(r=>escapeHtml(r.name)+(r.type?`(${escapeHtml(r.type)})`:'')).join(', ') +
+    '<br><span style="color:#6b7280">※ 요약엔 개별 서류 체크 정보가 없어, 서류 O표시는 "서류제출:" 줄이 있는 경우만 반영됩니다.</span>';
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function bulkSave(){
+  const cfg=loadCfg();
+  if(!cfg.url){ alert('먼저 ⚙️ 시트 연동 설정에서 웹앱 URL을 입력하세요.');
+    document.getElementById('cfg_body').classList.remove('hide');
+    document.getElementById('cfg_toggle').textContent='접기'; return; }
+  const recs=parseSummaries(document.getElementById('bulk_text').value);
+  if(!recs.length){ previewBulk(); return; }
+  if(!confirm(`${recs.length}명을 시트에 저장할까요?\n\n`+recs.map(r=>'· '+r.name).join('\n'))) return;
+  const log=document.getElementById('bulk_log'); let done=0;
+  for(const rec of recs){
+    rec.token=cfg.secret;
+    log.innerHTML=`전송 중… (${done+1}/${recs.length}) ${escapeHtml(rec.name)}`;
+    try{
+      await fetch(cfg.url,{method:'POST',mode:'no-cors',
+        headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(rec)});
+      done++;
+    }catch(e){}
+    await sleep(400);
+  }
+  log.innerHTML=`<b style="color:#1c6b3f">✅ ${done}/${recs.length}명 전송 완료.</b> 시트에서 확인하세요.`;
+  showToastMsg(`📤 ${done}명 일괄 저장 완료`, cfg.sheet);
+}
+
+function resetAll(){
+  if(!confirm('새 통화를 시작할까요? 현재 입력이 지워집니다. (연동 설정은 유지)')) return;
+  document.querySelectorAll('input[type=text],input[type=number],input[type=date],textarea').forEach(el=>{
+    if(!el.id.startsWith('cfg_') && el.id!=='f_date') el.value='';});
+  document.getElementById('summary').value='';
+  document.querySelectorAll('select').forEach(s=>s.value='');
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  selected={c_use:"",c_rl:"",c_drv:"",c_term:"",c_type:""};
+  renderDocs(); renderAlerts(); window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
