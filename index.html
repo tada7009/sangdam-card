@@ -264,6 +264,7 @@
           <a id="cfg_open" class="btn btn-amber" style="flex:1;text-align:center;text-decoration:none;line-height:1.7" target="_blank">시트 열기</a>
         </div>
         <button class="btn btn-open" style="width:100%;margin-top:8px" onclick="testConn()">🔗 연결 테스트 (웹앱 열기)</button>
+        <button class="btn btn-amber" style="width:100%;margin-top:8px" onclick="makeShareUrl()">📋 북마크용 주소 만들기 (기기 공유)</button>
       </div>
       <div class="cfg-status cfg-no" id="cfg_status">미설정 — 설치 가이드 참고</div>
     </div>
@@ -423,12 +424,30 @@ function toggleCfg(){
 }
 function loadCfg(){
   let cfg={};
-  try{ cfg=JSON.parse(localStorage.getItem(CFG_KEY))||{}; }catch(e){}
+  try{
+    const h=location.hash.charAt(0)==='#'?location.hash.substring(1):location.hash;
+    if(h){ const p=new URLSearchParams(h);
+      if(p.get('url')){
+        cfg={url:p.get('url')||'', secret:p.get('secret')||'', sheet:p.get('sheet')||''};
+        try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){}
+      }
+    }
+  }catch(e){}
+  if(!cfg.url){ try{ cfg=JSON.parse(localStorage.getItem(CFG_KEY))||{}; }catch(e){} }
   document.getElementById('cfg_url').value=cfg.url||'';
   document.getElementById('cfg_secret').value=cfg.secret||'';
   document.getElementById('cfg_sheet').value=cfg.sheet||'';
   updateCfgStatus(cfg);
   return cfg;
+}
+function makeShareUrl(){
+  const cfg={url:val('cfg_url'), secret:val('cfg_secret'), sheet:val('cfg_sheet')};
+  if(!cfg.url){ alert('먼저 ① 웹앱 URL을 입력하고 [설정 저장]을 누르세요.'); return; }
+  const base=location.origin+location.pathname;
+  const hash='url='+encodeURIComponent(cfg.url)+'&secret='+encodeURIComponent(cfg.secret)+'&sheet='+encodeURIComponent(cfg.sheet);
+  const full=base+'#'+hash;
+  navigator.clipboard.writeText(full).then(function(){ showToastMsg('📋 북마크용 주소 복사됨 — 이 주소를 북마크하세요'); }).catch(function(){});
+  window.prompt('이 주소를 두 컴퓨터·폰에 북마크하세요.\n(열면 연동이 자동으로 됩니다. 시크릿이 포함되니 외부에 공유하지 마세요.)', full);
 }
 function saveCfg(){
   const cfg={ url:document.getElementById('cfg_url').value.trim(),
